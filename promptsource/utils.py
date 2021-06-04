@@ -2,6 +2,7 @@
 
 import datasets
 import requests
+from datasets import load_dataset
 
 
 # Hard-coded additional English datasets
@@ -151,21 +152,11 @@ def renameDatasetColumn(dataset):
 
 def get_dataset(path, conf=None):
     "Get a dataset from name and conf."
-    module_path = datasets.load.prepare_module(path, dataset=True)
-    builder_cls = datasets.load.import_main_class(module_path[0], dataset=True)
-    if conf:
-        builder_instance = builder_cls(name=conf, cache_dir=None)
-    else:
-        builder_instance = builder_cls(cache_dir=None)
-    fail = False
-    if builder_instance.manual_download_instructions is None and builder_instance.info.size_in_bytes is not None:
-        builder_instance.download_and_prepare()
-        dts = builder_instance.as_dataset()
-        dataset = dts
-    else:
-        dataset = builder_instance
-        fail = True
-    return dataset, fail
+    try:
+        dataset = load_dataset(path, conf)
+        return dataset, False
+    except:
+        return None, True
 
 
 def get_dataset_confs(path):
